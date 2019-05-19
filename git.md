@@ -658,7 +658,7 @@ masterブランチは常に最新に、開発は別ブランチで行う。
                 {master}
                     ↓
 [コミット1]<--[コミット2]
-      ┌
+    　 ┌
         \
         [コミット3]
               ↑
@@ -840,15 +840,17 @@ GitHubにプッシュしたコミットをリベースした場合、ローカ�
 
 ## リベースとマージのどちらを使う？
 マージの特徴
+- マージコミットが残る
 - コンフリクトの解決が比較的簡単
 - マージコミットがたくさんあると履歴が複雑化する
 
 リベースの特徴
+- マージコミットが残らない
 - 履歴をきれいに保つことができる
 - コンフリクトの解決が若干面倒（コミットごとに解消が必要）
 
 作業の履歴を残したいなら--->マージ  
-履歴をきれいにしたいなら--->リベース
+履歴をきれいにしたいなら（単純にGitHubの内容を取得したいだけのときなど）--->リベース
 
 ## マージとリベースのコンフリクトの違い
 ```
@@ -878,6 +880,93 @@ GitHubにプッシュしたコミットをリベースした場合、ローカ�
 例：  
 プッシュしたローカルの変更--->マージ  
 プッシュしていないローカルの変更--->リベース
+
+## リベースで履歴を書き換える
+
+# タグ付けをする
+コミットを参照しやすくするために分かりやすい名前を付けるのがタグ。リリースポイントによく使われる。
+
+## タグの作成（計量版タグ）
+コミットに対して名前を付けられる。
+```
+$ git tag [タグ名]
+$ git tag 20190520_01
+
+# 後からタグ付けもできる
+$ git tag [タグ名] [コミット名]
+$ git tag 20190520_01 8a6cbc4
+```
+
+## タグの作成（注釈付きタグ）
+コミットの名前に加えてコメント、署名（誰がつけたか）を付けられる。
+```
+# オプションの -a(annotation) を付ける
+$ git tag -a [タグ名] -m "[メッセージ]"
+$ git tag -a 20190520_01 -m "version 20190520_01"
+```
+
+実際にタグを作成してみよう
+```
+# タグを作成
+$ git tag -a 20190520 -m "version 20190520"
+
+# タグの一覧を表示する
+$ git tag
+20190520
+
+# タグのデータを表示する
+$ git show 20190520
+tag 20190520
+Tagger: eiji-noguchi <eiji.program@gmail.com>
+Date:   Mon May 20 02:01:17 2019 +0900
+
+version 20190520
+
+commit 09993f542a4d63b130e878d746b2f4dd6e5307e8 (HEAD -> master, tag: 20190520)
+Author: eiji-noguchi <eiji.program@gmail.com>
+Date:   Mon May 20 02:00:28 2019 +0900
+
+    tag付けコミット
+
+diff --git a/index.html b/index.html
+index b2664f8..6a1cd75 100644
+--- a/index.html
++++ b/index.html
+@@ -1,2 +1,4 @@
+ masterから編集
+ featureから編集
++
++tag付け
+
+```
+このようにタグをリリースポイントに付けておくことによって、いつ何をリリースしたのか分かりやすく、バグが起きた際にも修正をしやすくなる。
+
+## タグをリモートリポジトリに送信する
+タグをリモートに送信するには`git push`コマンドで別途指定する。
+```
+$ git push [リモート名] [タグ名]
+$ git push origin　20190520
+
+# ローカルにあってリモートリポジトリに存在しないタグを一斉に送信する
+$ git push origin --tags
+```
+実際の動きを見てみよう
+```
+$ git tag
+20190520
+
+$ git push origin 20190520
+Enumerating objects: 6, done.
+Counting objects: 100% (6/6), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 455 bytes | 91.00 KiB/s, done.
+Total 4 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/eiji-noguchi/eiji_git.git
+ * [new tag]         20190520 -> 20190520
+```
+GitHubのリポジトリページ＞release＞Tags内に登録されていることを確認しよう！！
 
 # 備考
 ##  Gitコマンドメモ
@@ -960,3 +1049,4 @@ git branch -d <ブランチ名>
 ```
 git branch -D <ブランチ名>
 ```
+- 
